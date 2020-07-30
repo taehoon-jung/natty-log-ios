@@ -111,3 +111,7 @@ public enum LogLevelBound {
         }
     }
 }
+
+public protocol NattyLogDelegate {
+    func nLog(_ message:String)
+}

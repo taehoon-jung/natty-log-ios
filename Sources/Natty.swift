@@ -23,6 +23,7 @@ import Foundation
 public class Natty {
     /// Configuration for `Natty` instance.
     public var configuration: NattyConfiguration
+    public var delegate: NattyLogDelegate?
     
     /// Creates a `Natty` from a `NattyConfiguration`.
     ///
@@ -30,8 +31,9 @@ public class Natty {
     /// - Parameter configuration: A `configuration` value that specifies contain behaviors,
     ///                            such as minimum level for logging, setting prefix.
     ///                            Default value is `NattyConfiguration.default`
-    public init(by configuration: NattyConfiguration = NattyConfiguration.default) {
+    public init(by configuration: NattyConfiguration = NattyConfiguration.default, delegate:NattyLogDelegate? = nil) {
         self.configuration = configuration
+        self.delegate = delegate
     }
     
     /// Print log when `minloglevel` in `configuration` is lower than or equal to `debug`.
@@ -181,13 +183,17 @@ private extension Natty {
             logMessage.append(messageValue.debugDescription)
         }
         
-        switch configuration.outputMethod {
-        case .nslog:
-            printByNSLog(logMessage: logMessage)
-        case .print:
-            print(logMessage)
-        case .custom(let closure):
-            closure(logMessage)
+        if let d = delegate {
+            d.nLog(logMessage)
+        } else {
+            switch configuration.outputMethod {
+            case .nslog:
+                printByNSLog(logMessage: logMessage)
+            case .print:
+                print(logMessage)
+            case .custom(let closure):
+                closure(logMessage)
+            }
         }
         
         then?(.success(logMessage))
